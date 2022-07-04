@@ -1,0 +1,33 @@
+diff --git a/Eigen/src/SVD/BDCSVD.h b/Eigen/src/SVD/BDCSVD.h
+index f9e0c6259..ac0a81510 100644
+--- a/Eigen/src/SVD/BDCSVD.h
++++ b/Eigen/src/SVD/BDCSVD.h
+@@ -1036,8 +1036,17 @@ void BDCSVD<MatrixType, Options>::computeSingVals(const ArrayRef& col0, const Ar
+ 
+       if(fLeft<Literal(0))
+       {
++        RealScalar last_fLeft;
++        RealScalar last_rightShifted;
++        RealScalar last_leftShifted;
++
+         while (rightShifted - leftShifted > Literal(2) * NumTraits<RealScalar>::epsilon() * numext::maxi<RealScalar>(abs(leftShifted), abs(rightShifted)))
+         {
++          // record current values to look for progress
++          last_fLeft = fLeft;
++          last_rightShifted = rightShifted;
++          last_leftShifted = leftShifted;
++
+           RealScalar midShifted = (leftShifted + rightShifted) / Literal(2);
+           fMid = secularEq(midShifted, col0, diag, perm, diagShifted, shift);
+           eigen_internal_assert((numext::isfinite)(fMid));
+@@ -1051,6 +1060,10 @@ void BDCSVD<MatrixType, Options>::computeSingVals(const ArrayRef& col0, const Ar
+             leftShifted = midShifted;
+             fLeft = fMid;
+           }
++          // avoid stagnating
++          if (last_fLeft == fLeft && last_leftShifted == leftShifted && last_rightShifted == rightShifted) {
++            break;
++          }
+         }
+         muCur = (leftShifted + rightShifted) / Literal(2);
+       }
