@@ -47,9 +47,15 @@
 
                     ''; #'' + extra_patch;
 
-                    cmakeFlags = [
-                        "-DBUILD_DEMONSTRATION=OFF"
-                    ];
+                    #cmakeFlags = [
+                    #    "-DBUILD_DEMONSTRATION=OFF"
+                    #];
+
+                    doCheck = true;
+
+                    checkPhase = ''
+                        ctest -j$(nproc)
+                    '';
                 };
 
                 eigen = pkgs.eigen.overrideAttrs(old: {

@@ -67,4 +67,17 @@ if(TEST)
         target_compile_features(Complex${td} INTERFACE cxx_std_20)
         add_test(NAME Complex${td} COMMAND Complex${td})
     endforeach()
+
+    add_executable(TestIO test/test_matrix_io.cxx)
+    target_link_libraries(TestIO Eigen3::Eigen)
+    target_include_directories(TestIO PUBLIC "${PROJECT_BINARY_DIR}" "EigenIntegration")
+    target_compile_features(TestIO INTERFACE cxx_std_20)
+    add_test(NAME TestIO COMMAND TestIO)
+
+
+    add_executable(TestPatch test/test_patched_eigen_svd.cxx)
+    target_link_libraries(TestPatch Eigen3::Eigen)
+    target_include_directories(TestPatch PUBLIC "${PROJECT_BINARY_DIR}" "EigenIntegration")
+    target_compile_features(TestPatch INTERFACE cxx_std_20)
+    add_test(NAME TestPatch COMMAND TestPatch)
 endif(TEST)
