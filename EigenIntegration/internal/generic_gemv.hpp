@@ -50,6 +50,7 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, GemvProduct>
       for (int col = 0; col < dst.cols();
            col++) { // technically, dst.cols "should" be one, but maybe this is
                     // used for vector*matrix aswell?
+        // this does not need an omp critical block, as each destination will only be written to once
         dst.coeffRef(row, col) +=
             alpha * eigen_fdp(actual_lhs.row(row), actual_rhs.col(col));
       }
