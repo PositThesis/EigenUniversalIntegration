@@ -76,7 +76,6 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, InnerProduct>
 #ifdef TEST_EIGEN_USAGE
     eigen_usage_vector |= (uint64_t)EigenOverrideMask::GENERIC_INNER;
 #endif
-    eigen_assert(dst.rows() == a_lhs.rows() && dst.cols() == a_rhs.cols());
     if (a_lhs.cols() == 0 || a_lhs.rows() == 0 || a_rhs.cols() == 0)
       return;
 
