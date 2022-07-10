@@ -416,7 +416,7 @@ int main() {
   IEEE Rp_as_ieee = std::complex((typename IEEE::value_type)(Rp.real()),
                                  (typename IEEE::value_type)(Rp.imag()));
 #endif
-  double residual = std::abs(Rd) - std::abs(Rp_as_ieee);
+  double residual = std::abs(Rd - Rp_as_ieee);
 
   if (residual < 1e-10) {
     return 0;
@@ -449,7 +449,7 @@ int main() {
   IEEE Rp_as_ieee = std::complex((typename IEEE::value_type)(Rp.real()),
                                  (typename IEEE::value_type)(Rp.imag()));
 #endif
-  double residual = std::abs(Rd) - std::abs(Rp_as_ieee);
+  double residual = std::abs(Rd - Rp_as_ieee);
 
   if (residual < 1e-10) {
     return 0;
