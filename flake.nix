@@ -47,9 +47,10 @@
 
                     ''; #'' + extra_patch;
 
-                    #cmakeFlags = [
+                    cmakeFlags = [
                     #    "-DBUILD_DEMONSTRATION=OFF"
-                    #];
+                        "-DUSE_AVX2=ON"
+                    ];
 
                     doCheck = true;
 
