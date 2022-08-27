@@ -6,5 +6,6 @@
 #include "internal/generic_gemv.hpp"
 #include "internal/generic_inner.hpp"
 #include "internal/generic_lazy.hpp"
+#include "std_integration.hpp"
 
 #endif

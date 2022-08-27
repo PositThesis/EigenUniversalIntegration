@@ -96,8 +96,9 @@
             devShell = pkgs.mkShell {
                 buildInputs = [
                     packages.universal
-                    pkgs.eigen
+                    packages.eigen
                     pkgs.cmake
+                    pkgs.kdevelop
                     # pkgs.gdbgui
                 ];
 
