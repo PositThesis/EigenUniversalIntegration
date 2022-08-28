@@ -3,8 +3,10 @@
 #include <universal/number/posit/posit.hpp>
 #include <iostream>
 
+using Scalar = sw::universal::posit<32, 2>;
+
 int main() {
-    sw::universal::posit<32, 2> a = 3.14159;
+    Scalar a = 3.14159;
 
     int code = 0;
 
@@ -34,7 +36,15 @@ int main() {
         code = -1;
     }
     if (std::abs(std::pow(a, a) - 36.46215) > 0.001) {
-        std::cerr << "ceil value: " << std::ceil(a) << std::endl;
+        std::cerr << "pow value: " << std::pow(a, a) << std::endl;
+        code = -1;
+    }
+    if (std::abs(std::log(a) - 1.14472) > 0.001) {
+        std::cerr << "log value: " << std::log(a) << std::endl;
+        code = -1;
+    }
+    if (std::abs(std::atan(a) - 1.262627) > 0.001) {
+        std::cerr << "atan value: " << std::atan(a) << std::endl;
         code = -1;
     }
 
