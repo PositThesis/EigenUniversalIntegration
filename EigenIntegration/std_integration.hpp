@@ -1,6 +1,7 @@
 #ifndef STD_INTEGRATION_HPP
 #define STD_INTEGRATION_HPP
 
+#include <string>
 #include <cmath>
 #include <universal/number/posit/posit.hpp>
 #include <universal/number/posit/mathlib.hpp>
@@ -50,6 +51,11 @@ namespace std {
     make_std_posit_fun(exp)
     make_std_posit_fun(log)
     make_std_posit_fun(atan)
+
+    template <typename T> requires ScalarIsPosit<T>
+    std::string to_string(T t) {
+        return sw::universal::to_string(t);
+    }
 
     template <typename T> requires ScalarIsPosit<T>
     T pow(T base, T exp) {

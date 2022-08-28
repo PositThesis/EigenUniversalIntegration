@@ -1,5 +1,6 @@
 #include <cmath>
 #include "std_integration.hpp"
+#include <string>
 #include <universal/number/posit/posit.hpp>
 #include <iostream>
 
@@ -45,6 +46,10 @@ int main() {
     }
     if (std::abs(std::atan(a) - 1.262627) > 0.001) {
         std::cerr << "atan value: " << std::atan(a) << std::endl;
+        code = -1;
+    }
+    if (std::to_string(a).compare("3.1415899991989136") != 0) { // 3.14159 cannot be represented directly. this is the closest posit
+        std::cerr << "string value: " << std::to_string(a) << std::endl;
         code = -1;
     }
 
