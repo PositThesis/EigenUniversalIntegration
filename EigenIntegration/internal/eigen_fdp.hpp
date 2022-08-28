@@ -18,6 +18,9 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
     constexpr size_t nbits = Lhs::Scalar::nbits;
     constexpr size_t es = Lhs::Scalar::es;
     constexpr size_t capacity = 20; // support vectors up to 1M elements
+
+    using Scalar = sw::universal::posit<nbits, es>;
+
     if constexpr (!is_complex<typename Rhs::Scalar>) { // Lhs and Rhs real
 
       sw::universal::quire<nbits, es, capacity> q(0);
@@ -69,12 +72,12 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
             q_real +=
                 sw::universal::quire_mul(lhs(0, idx), rhs(0, idx).real());
             q_real -=
-                sw::universal::quire_mul(0, rhs(0, idx).imag());
+                sw::universal::quire_mul(Scalar(0), rhs(0, idx).imag());
 
             q_imag +=
                 sw::universal::quire_mul(lhs(0, idx), rhs(0, idx).imag());
             q_imag +=
-                sw::universal::quire_mul(0, rhs(0, idx).real());
+                sw::universal::quire_mul(Scalar(0), rhs(0, idx).real());
           }
         } else {
           assert(lhs.cols() == rhs.rows());
@@ -82,12 +85,12 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
             q_real +=
                 sw::universal::quire_mul(lhs(0, idx), rhs(idx, 0).real());
             q_real -=
-                sw::universal::quire_mul(0, rhs(idx, 0).imag());
+                sw::universal::quire_mul(Scalar(0), rhs(idx, 0).imag());
 
             q_imag +=
                 sw::universal::quire_mul(lhs(0, idx), rhs(idx, 0).imag());
             q_imag +=
-                sw::universal::quire_mul(0, rhs(idx, 0).real());
+                sw::universal::quire_mul(Scalar(0), rhs(idx, 0).real());
           }
         }
       } else {
@@ -97,12 +100,12 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
             q_real +=
                 sw::universal::quire_mul(lhs(idx, 0), rhs(0, idx).real());
             q_real -=
-                sw::universal::quire_mul(0, rhs(0, idx).imag());
+                sw::universal::quire_mul(Scalar(0), rhs(0, idx).imag());
 
             q_imag +=
                 sw::universal::quire_mul(lhs(idx, 0), rhs(0, idx).imag());
             q_imag +=
-                sw::universal::quire_mul(0, rhs(0, idx).real());
+                sw::universal::quire_mul(Scalar(0), rhs(0, idx).real());
           }
         } else {
           assert(lhs.rows() == rhs.rows());
@@ -110,12 +113,12 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
             q_real +=
                 sw::universal::quire_mul(lhs(idx, 0), rhs(idx, 0).real());
             q_real -=
-                sw::universal::quire_mul(0, rhs(idx, 0).imag());
+                sw::universal::quire_mul(Scalar(0), rhs(idx, 0).imag());
 
             q_imag +=
                 sw::universal::quire_mul(lhs(idx, 0), rhs(idx, 0).imag());
             q_imag +=
-                sw::universal::quire_mul(0, rhs(idx, 0).real());
+                sw::universal::quire_mul(Scalar(0), rhs(idx, 0).real());
           }
         }
       }
@@ -133,6 +136,8 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
     sw::universal::quire<nbits, es, capacity> q_real(0);
     sw::universal::quire<nbits, es, capacity> q_imag(0);
 
+    using Scalar = sw::universal::posit<nbits, es>;
+
     if constexpr (!is_complex<typename Rhs::Scalar>) { // Lhs complex, Rhs real
 
       // decide which axes have to be iterated over. Each condition is evaluated
@@ -144,10 +149,10 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
             q_real +=
                 sw::universal::quire_mul(lhs(0, idx).real(), rhs(0, idx));
             q_real -=
-                sw::universal::quire_mul(lhs(0, idx).imag(), 0);
+                sw::universal::quire_mul(lhs(0, idx).imag(), Scalar(0));
 
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).real(), 0);
+                sw::universal::quire_mul(lhs(0, idx).real(), Scalar(0));
             q_imag +=
                 sw::universal::quire_mul(lhs(0, idx).imag(), rhs(0, idx));
           }
@@ -157,10 +162,10 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
             q_real +=
                 sw::universal::quire_mul(lhs(0, idx).real(), rhs(idx, 0));
             q_real -=
-                sw::universal::quire_mul(lhs(0, idx).imag(), 0);
+                sw::universal::quire_mul(lhs(0, idx).imag(), Scalar(0));
 
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).real(), 0);
+                sw::universal::quire_mul(lhs(0, idx).real(), Scalar(0));
             q_imag +=
                 sw::universal::quire_mul(lhs(0, idx).imag(), rhs(idx, 0));
           }
@@ -172,10 +177,10 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
             q_real +=
                 sw::universal::quire_mul(lhs(idx, 0).real(), rhs(0, idx));
             q_real -=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), 0);
+                sw::universal::quire_mul(lhs(idx, 0).imag(), Scalar(0));
 
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), 0);
+                sw::universal::quire_mul(lhs(idx, 0).real(), Scalar(0));
             q_imag +=
                 sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(0, idx));
           }
@@ -185,10 +190,10 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
             q_real +=
                 sw::universal::quire_mul(lhs(idx, 0).real(), rhs(idx, 0));
             q_real -=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), 0);
+                sw::universal::quire_mul(lhs(idx, 0).imag(), Scalar(0));
 
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), 0);
+                sw::universal::quire_mul(lhs(idx, 0).real(), Scalar(0));
             q_imag +=
                 sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(idx, 0));
           }
