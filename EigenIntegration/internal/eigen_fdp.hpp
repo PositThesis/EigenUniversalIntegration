@@ -74,8 +74,8 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
       return sum;
     } else { // Lhs real, rhs complex
 
-      constexpr size_t nbits = Lhs::Scalar::value_type::nbits;
-      constexpr size_t es = Lhs::Scalar::value_type::es;
+      constexpr size_t nbits = Rhs::Scalar::value_type::nbits;
+      constexpr size_t es = Rhs::Scalar::value_type::es;
       constexpr size_t capacity = 20; // support vectors up to 1M elements
       sw::universal::quire<nbits, es, capacity> q_real(0);
       sw::universal::quire<nbits, es, capacity> q_imag(0);
