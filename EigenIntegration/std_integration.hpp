@@ -23,6 +23,14 @@ namespace std {
     T abs(T t) {
         return sw::universal::abs(t);
     }
+    template <typename T> requires ScalarIsPosit<T>
+    T floor(T t) {
+        return sw::universal::floor(t);
+    }
+    template <typename T> requires ScalarIsPosit<T>
+    T ceil(T t) {
+        return sw::universal::ceil(t);
+    }
 }
 
 #endif
