@@ -31,6 +31,14 @@ namespace std {
     T ceil(T t) {
         return sw::universal::ceil(t);
     }
+    template <typename T> requires ScalarIsPosit<T>
+    T exp(T t) {
+        return sw::universal::exp(t);
+    }
+    template <typename T> requires ScalarIsPosit<T>
+    T pow(T base, T exp) {
+        return sw::universal::pow(base, exp);
+    }
 }
 
 #endif

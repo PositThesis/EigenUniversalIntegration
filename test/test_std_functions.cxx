@@ -21,5 +21,22 @@ int main() {
         code = -1;
     }
 
+    if (std::floor(a) != 3.0) {
+        std::cerr << "floor value: " << std::floor(a) << std::endl;
+        code = -1;
+    }
+    if (std::ceil(a) != 4.0) {
+        std::cerr << "ceil value: " << std::ceil(a) << std::endl;
+        code = -1;
+    }
+    if (std::abs(std::exp(a) - 23.1406) > 0.001) {
+        std::cerr << "exp value: " << std::exp(a) << std::endl;
+        code = -1;
+    }
+    if (std::abs(std::pow(a, a) - 36.46215) > 0.001) {
+        std::cerr << "ceil value: " << std::ceil(a) << std::endl;
+        code = -1;
+    }
+
     return code;
 }
