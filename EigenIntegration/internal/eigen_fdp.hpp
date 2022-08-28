@@ -10,7 +10,7 @@ template <typename Lhs, typename Rhs> struct MultiplyReturnType {
 };
 
 template <typename Lhs, typename Rhs>
-requires (HasComplexPositScalar<Lhs> || HasPositScalar<Rhs>)
+requires (HasComplexPositScalar<Lhs> && HasPositScalar<Rhs>)
     struct MultiplyReturnType<Lhs, Rhs> {
   typedef Lhs::Scalar type;
 };
