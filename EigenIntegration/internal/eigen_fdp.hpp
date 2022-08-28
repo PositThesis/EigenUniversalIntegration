@@ -18,38 +18,114 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
     constexpr size_t nbits = Lhs::Scalar::nbits;
     constexpr size_t es = Lhs::Scalar::es;
     constexpr size_t capacity = 20; // support vectors up to 1M elements
-    sw::universal::quire<nbits, es, capacity> q(0);
+    if constexpr (!is_complex<typename Rhs::Scalar>) { // Lhs and Rhs real
 
-    // decide which axes have to be iterated over. Each condition is evaluated
-    // only once per fdp.
-    if (lhs.rows() == 1) {
-      if (rhs.rows() == 1) {
-        assert(lhs.cols() == rhs.cols());
-        for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q += sw::universal::quire_mul(lhs(0, idx), rhs(0, idx));
+      sw::universal::quire<nbits, es, capacity> q(0);
+
+      // decide which axes have to be iterated over. Each condition is evaluated
+      // only once per fdp.
+      if (lhs.rows() == 1) {
+        if (rhs.rows() == 1) {
+          assert(lhs.cols() == rhs.cols());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q += sw::universal::quire_mul(lhs(0, idx), rhs(0, idx));
+          }
+        } else {
+          assert(lhs.cols() == rhs.rows());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q += sw::universal::quire_mul(lhs(0, idx), rhs(idx, 0));
+          }
         }
       } else {
-        assert(lhs.cols() == rhs.rows());
-        for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q += sw::universal::quire_mul(lhs(0, idx), rhs(idx, 0));
+        if (rhs.rows() == 1) {
+          assert(lhs.rows() == rhs.cols());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q += sw::universal::quire_mul(lhs(idx, 0), rhs(0, idx));
+          }
+        } else {
+          assert(lhs.rows() == rhs.rows());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q += sw::universal::quire_mul(lhs(idx, 0), rhs(idx, 0));
+          }
         }
       }
-    } else {
-      if (rhs.rows() == 1) {
-        assert(lhs.rows() == rhs.cols());
-        for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q += sw::universal::quire_mul(lhs(idx, 0), rhs(0, idx));
+      typename Lhs::Scalar sum;
+      convert(q.to_value(), sum);
+      return sum;
+    } else { // Lhs real, rhs complex
+
+      constexpr size_t nbits = Lhs::Scalar::value_type::nbits;
+      constexpr size_t es = Lhs::Scalar::value_type::es;
+      constexpr size_t capacity = 20; // support vectors up to 1M elements
+      sw::universal::quire<nbits, es, capacity> q_real(0);
+      sw::universal::quire<nbits, es, capacity> q_imag(0);
+
+      // decide which axes have to be iterated over. Each condition is evaluated
+      // only once per fdp.
+      if (lhs.rows() == 1) {
+        if (rhs.rows() == 1) {
+          assert(lhs.cols() == rhs.cols());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(0, idx), rhs(0, idx).real());
+            q_real -=
+                sw::universal::quire_mul(0, rhs(0, idx).imag());
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx), rhs(0, idx).imag());
+            q_imag +=
+                sw::universal::quire_mul(0, rhs(0, idx).real());
+          }
+        } else {
+          assert(lhs.cols() == rhs.rows());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(0, idx), rhs(idx, 0).real());
+            q_real -=
+                sw::universal::quire_mul(0, rhs(idx, 0).imag());
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx), rhs(idx, 0).imag());
+            q_imag +=
+                sw::universal::quire_mul(0, rhs(idx, 0).real());
+          }
         }
       } else {
-        assert(lhs.rows() == rhs.rows());
-        for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q += sw::universal::quire_mul(lhs(idx, 0), rhs(idx, 0));
+        if (rhs.rows() == 1) {
+          assert(lhs.rows() == rhs.cols());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(idx, 0), rhs(0, idx).real());
+            q_real -=
+                sw::universal::quire_mul(0, rhs(0, idx).imag());
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0), rhs(0, idx).imag());
+            q_imag +=
+                sw::universal::quire_mul(0, rhs(0, idx).real());
+          }
+        } else {
+          assert(lhs.rows() == rhs.rows());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(idx, 0), rhs(idx, 0).real());
+            q_real -=
+                sw::universal::quire_mul(0, rhs(idx, 0).imag());
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0), rhs(idx, 0).imag());
+            q_imag +=
+                sw::universal::quire_mul(0, rhs(idx, 0).real());
+          }
         }
       }
+
+      typename Lhs::Scalar::value_type sum_real;
+      typename Lhs::Scalar::value_type sum_imag;
+      convert(q_real.to_value(), sum_real);
+      convert(q_imag.to_value(), sum_imag);
+      return std::complex(sum_real, sum_imag);
     }
-    typename Lhs::Scalar sum;
-    convert(q.to_value(), sum);
-    return sum;
   } else {
     constexpr size_t nbits = Lhs::Scalar::value_type::nbits;
     constexpr size_t es = Lhs::Scalar::value_type::es;
@@ -57,71 +133,141 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
     sw::universal::quire<nbits, es, capacity> q_real(0);
     sw::universal::quire<nbits, es, capacity> q_imag(0);
 
-    // decide which axes have to be iterated over. Each condition is evaluated
-    // only once per fdp.
-    if (lhs.rows() == 1) {
-      if (rhs.rows() == 1) {
-        assert(lhs.cols() == rhs.cols());
-        for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q_real +=
-              sw::universal::quire_mul(lhs(0, idx).real(), rhs(0, idx).real());
-          q_real -=
-              sw::universal::quire_mul(lhs(0, idx).imag(), rhs(0, idx).imag());
+    if constexpr (!is_complex<typename Rhs::Scalar>) { // Lhs complex, Rhs real
 
-          q_imag +=
-              sw::universal::quire_mul(lhs(0, idx).real(), rhs(0, idx).imag());
-          q_imag +=
-              sw::universal::quire_mul(lhs(0, idx).imag(), rhs(0, idx).real());
+      // decide which axes have to be iterated over. Each condition is evaluated
+      // only once per fdp.
+      if (lhs.rows() == 1) {
+        if (rhs.rows() == 1) {
+          assert(lhs.cols() == rhs.cols());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(0, idx).real(), rhs(0, idx));
+            q_real -=
+                sw::universal::quire_mul(lhs(0, idx).imag(), 0);
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx).real(), 0);
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(0, idx));
+          }
+        } else {
+          assert(lhs.cols() == rhs.rows());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(0, idx).real(), rhs(idx, 0));
+            q_real -=
+                sw::universal::quire_mul(lhs(0, idx).imag(), 0);
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx).real(), 0);
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(idx, 0));
+          }
         }
       } else {
-        assert(lhs.cols() == rhs.rows());
-        for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q_real +=
-              sw::universal::quire_mul(lhs(0, idx).real(), rhs(idx, 0).real());
-          q_real -=
-              sw::universal::quire_mul(lhs(0, idx).imag(), rhs(idx, 0).imag());
+        if (rhs.rows() == 1) {
+          assert(lhs.rows() == rhs.cols());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(0, idx));
+            q_real -=
+                sw::universal::quire_mul(lhs(idx, 0).imag(), 0);
 
-          q_imag +=
-              sw::universal::quire_mul(lhs(0, idx).real(), rhs(idx, 0).imag());
-          q_imag +=
-              sw::universal::quire_mul(lhs(0, idx).imag(), rhs(idx, 0).real());
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0).real(), 0);
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(0, idx));
+          }
+        } else {
+          assert(lhs.rows() == rhs.rows());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(idx, 0));
+            q_real -=
+                sw::universal::quire_mul(lhs(idx, 0).imag(), 0);
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0).real(), 0);
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(idx, 0));
+          }
         }
       }
-    } else {
-      if (rhs.rows() == 1) {
-        assert(lhs.rows() == rhs.cols());
-        for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q_real +=
-              sw::universal::quire_mul(lhs(idx, 0).real(), rhs(0, idx).real());
-          q_real -=
-              sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(0, idx).imag());
 
-          q_imag +=
-              sw::universal::quire_mul(lhs(idx, 0).real(), rhs(0, idx).imag());
-          q_imag +=
-              sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(0, idx).real());
+      typename Lhs::Scalar::value_type sum_real;
+      typename Lhs::Scalar::value_type sum_imag;
+      convert(q_real.to_value(), sum_real);
+      convert(q_imag.to_value(), sum_imag);
+      return std::complex(sum_real, sum_imag);
+
+    } else { // Lhs and Rhs complex
+      // decide which axes have to be iterated over. Each condition is evaluated
+      // only once per fdp.
+      if (lhs.rows() == 1) {
+        if (rhs.rows() == 1) {
+          assert(lhs.cols() == rhs.cols());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(0, idx).real(), rhs(0, idx).real());
+            q_real -=
+                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(0, idx).imag());
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx).real(), rhs(0, idx).imag());
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(0, idx).real());
+          }
+        } else {
+          assert(lhs.cols() == rhs.rows());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(0, idx).real(), rhs(idx, 0).real());
+            q_real -=
+                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(idx, 0).imag());
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx).real(), rhs(idx, 0).imag());
+            q_imag +=
+                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(idx, 0).real());
+          }
         }
       } else {
-        assert(lhs.rows() == rhs.rows());
-        for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q_real +=
-              sw::universal::quire_mul(lhs(idx, 0).real(), rhs(idx, 0).real());
-          q_real -=
-              sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(idx, 0).imag());
+        if (rhs.rows() == 1) {
+          assert(lhs.rows() == rhs.cols());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(0, idx).real());
+            q_real -=
+                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(0, idx).imag());
 
-          q_imag +=
-              sw::universal::quire_mul(lhs(idx, 0).real(), rhs(idx, 0).imag());
-          q_imag +=
-              sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(idx, 0).real());
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(0, idx).imag());
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(0, idx).real());
+          }
+        } else {
+          assert(lhs.rows() == rhs.rows());
+          for (Eigen::Index idx = 0; idx < depth; idx++) {
+            q_real +=
+                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(idx, 0).real());
+            q_real -=
+                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(idx, 0).imag());
+
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(idx, 0).imag());
+            q_imag +=
+                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(idx, 0).real());
+          }
         }
       }
+
+      typename Lhs::Scalar::value_type sum_real;
+      typename Lhs::Scalar::value_type sum_imag;
+      convert(q_real.to_value(), sum_real);
+      convert(q_imag.to_value(), sum_imag);
+      return std::complex(sum_real, sum_imag);
     }
-
-    typename Lhs::Scalar::value_type sum_real;
-    typename Lhs::Scalar::value_type sum_imag;
-    convert(q_real.to_value(), sum_real);
-    convert(q_imag.to_value(), sum_imag);
-    return std::complex(sum_real, sum_imag);
   }
 }
 
