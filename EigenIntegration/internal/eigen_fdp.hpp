@@ -5,9 +5,26 @@
 #include <Eigen/Dense>
 #include <universal/number/posit/quire.hpp>
 
+template <typename Lhs, typename Rhs> struct MultiplyReturnType {
+  typedef Lhs::Scalar type;
+};
+
+template <typename Lhs, typename Rhs>
+requires (HasComplexPositScalar<Lhs> || HasPositScalar<Rhs>)
+    struct MultiplyReturnType<Lhs, Rhs> {
+  typedef Lhs::Scalar type;
+};
+
+template <typename Lhs, typename Rhs>
+requires HasComplexPositScalar<Rhs>
+    struct MultiplyReturnType<Lhs, Rhs> {
+  typedef Rhs::Scalar type;
+};
+
+
 template <typename Lhs, typename Rhs>
 requires HasPositOrComplexPositScalar<Lhs>
-typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
+typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
   // based on the implementation in the stillwater universal library
   Eigen::Index depth = lhs.rows() != 1 ? lhs.rows() : lhs.cols();
 
@@ -123,8 +140,8 @@ typename Lhs::Scalar eigen_fdp(const Lhs &lhs, const Rhs &rhs) {
         }
       }
 
-      typename Lhs::Scalar::value_type sum_real;
-      typename Lhs::Scalar::value_type sum_imag;
+      typename Rhs::Scalar::value_type sum_real;
+      typename Rhs::Scalar::value_type sum_imag;
       convert(q_real.to_value(), sum_real);
       convert(q_imag.to_value(), sum_imag);
       return std::complex(sum_real, sum_imag);
