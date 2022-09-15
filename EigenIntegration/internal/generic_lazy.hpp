@@ -89,7 +89,7 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, LazyProduct>
     // calculate fdp
     bool blocking = false; // some blocking heuristic?
     if (!blocking) {
-#pragma omp parallel for collapse(2)
+// #pragma omp parallel for collapse(2)
       for (int row = 0; row < dst.rows(); row++) {
         for (int col = 0; col < dst.cols(); col++) {
           dst.coeffRef(row, col) +=
@@ -108,7 +108,7 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, LazyProduct>
           int max_col = blocking_col_start + block_size > dst.rows()
                             ? dst.rows()
                             : blocking_col_start + block_size;
-#pragma omp parallel for collapse(2)
+// #pragma omp parallel for collapse(2)
           for (int row = blocking_row_start; row < max_row; row++) {
             for (int col = blocking_col_start; col < max_col; col++) {
               dst.coeffRef(row, col) +=

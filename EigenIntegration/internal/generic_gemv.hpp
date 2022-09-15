@@ -45,7 +45,7 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, GemvProduct>
     LhsNested actual_lhs(lhs);
     RhsNested actual_rhs(rhs);
     // calculate fdp
-#pragma omp parallel for collapse(2)
+// #pragma omp parallel for collapse(2)
     for (int row = 0; row < dst.rows(); row++) {
       for (int col = 0; col < dst.cols();
            col++) { // technically, dst.cols "should" be one, but maybe this is
