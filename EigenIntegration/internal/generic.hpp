@@ -1,5 +1,3 @@
-#ifndef GENERIC_LAZY_OVERRIDE_HPP
-#define GENERIC_LAZY_OVERRIDE_HPP
 
 #include "eigen_fdp.hpp"
 #include "posit_concepts.hpp"
@@ -18,10 +16,10 @@ namespace internal {
 
 template <typename Lhs, typename Rhs>
 requires HasPositOrComplexPositScalar<Lhs>
-struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, LazyProduct>
+struct generic_product_impl<Lhs, Rhs, LeftSideShape__, RightSideShape__, DefinedProductType__>
     : generic_product_impl_base<
           Lhs, Rhs,
-          generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, LazyProduct>> {
+          generic_product_impl<Lhs, Rhs, LeftSideShape__, RightSideShape__, DefinedProductType__>> {
   typedef typename Product<Lhs, Rhs>::Scalar Scalar;
   typedef typename Lhs::Scalar LhsScalar;
   typedef typename Rhs::Scalar RhsScalar;
@@ -40,10 +38,6 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, LazyProduct>
     MaxDepthAtCompileTime = EIGEN_SIZE_MIN_PREFER_FIXED(
         Lhs::MaxColsAtCompileTime, Rhs::MaxRowsAtCompileTime)
   };
-
-  typedef generic_product_impl<Lhs, Rhs, DenseShape, DenseShape,
-                               CoeffBasedProductMode>
-      lazyproduct;
 
   template <typename Dst>
   static void evalTo(Dst &dst, const Lhs &lhs, const Rhs &rhs) {
@@ -73,7 +67,10 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, LazyProduct>
   static void scaleAndAddTo(Dest &dst, const Lhs &a_lhs, const Rhs &a_rhs,
                             const Scalar &alpha) {
 #ifdef TEST_EIGEN_USAGE
+    eigen_usage_vector |= (uint64_t)EigenOverrideMask::GENERIC_GEMM;
+    eigen_usage_vector |= (uint64_t)EigenOverrideMask::GENERIC_GEMV;
     eigen_usage_vector |= (uint64_t)EigenOverrideMask::GENERIC_LAZY;
+    eigen_usage_vector |= (uint64_t)EigenOverrideMask::GENERIC_INNER;
 #endif
     eigen_assert(dst.rows() == a_lhs.rows() && dst.cols() == a_rhs.cols());
     if (a_lhs.cols() == 0 || a_lhs.rows() == 0 || a_rhs.cols() == 0)
@@ -87,9 +84,10 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, LazyProduct>
     Scalar actualAlpha = combine_scalar_factors(alpha, a_lhs, a_rhs);
 
     // calculate fdp
-    bool blocking = false; // some blocking heuristic?
+    bool blocking = lhs.rows() + lhs.cols() + rhs.cols() > 20; // same heuristic as in eigen
     if (!blocking) {
-// #pragma omp parallel for collapse(2)
+      // only when the problem is small -> no omp needed
+      // #pragma omp parallel for collapse(2)
       for (int row = 0; row < dst.rows(); row++) {
         for (int col = 0; col < dst.cols(); col++) {
           dst.coeffRef(row, col) +=
@@ -105,10 +103,10 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, LazyProduct>
                           : blocking_row_start + block_size;
         for (int blocking_col_start = 0; blocking_col_start < dst.cols();
              blocking_col_start += block_size) {
-          int max_col = blocking_col_start + block_size > dst.rows()
-                            ? dst.rows()
+          int max_col = blocking_col_start + block_size > dst.cols()
+                            ? dst.cols()
                             : blocking_col_start + block_size;
-// #pragma omp parallel for collapse(2)
+          #pragma omp parallel for collapse(2)
           for (int row = blocking_row_start; row < max_row; row++) {
             for (int col = blocking_col_start; col < max_col; col++) {
               dst.coeffRef(row, col) +=
@@ -123,4 +121,3 @@ struct generic_product_impl<Lhs, Rhs, DenseShape, DenseShape, LazyProduct>
 
 } // namespace internal
 } // namespace Eigen
-#endif
