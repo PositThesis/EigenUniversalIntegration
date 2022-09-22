@@ -205,7 +205,7 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
           assert(lhs.rows() == rhs.rows());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), rhs(idx, 0));
+                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), rhs.coeff(idx, 0));
             q_real -=
                 sw::universal::quire_mul(lhs.coeff(idx, 0).imag(), Scalar(0));
 
