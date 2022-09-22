@@ -48,24 +48,24 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
         if (rhs.rows() == 1) {
           assert(lhs.cols() == rhs.cols());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
-            q += sw::universal::quire_mul(lhs(0, idx), rhs(0, idx));
+            q += sw::universal::quire_mul(lhs.coeff(0, idx), rhs.coeff(0, idx));
           }
         } else {
           assert(lhs.cols() == rhs.rows());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
-            q += sw::universal::quire_mul(lhs(0, idx), rhs(idx, 0));
+            q += sw::universal::quire_mul(lhs.coeff(0, idx), rhs.coeff(idx, 0));
           }
         }
       } else {
         if (rhs.rows() == 1) {
           assert(lhs.rows() == rhs.cols());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
-            q += sw::universal::quire_mul(lhs(idx, 0), rhs(0, idx));
+            q += sw::universal::quire_mul(lhs.coeff(idx, 0), rhs.coeff(0, idx));
           }
         } else {
           assert(lhs.rows() == rhs.rows());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
-            q += sw::universal::quire_mul(lhs(idx, 0), rhs(idx, 0));
+            q += sw::universal::quire_mul(lhs.coeff(idx, 0), rhs.coeff(idx, 0));
           }
         }
       }
@@ -87,27 +87,27 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
           assert(lhs.cols() == rhs.cols());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(0, idx), rhs(0, idx).real());
+                sw::universal::quire_mul(lhs.coeff(0, idx), rhs.coeff(0, idx).real());
             q_real -=
-                sw::universal::quire_mul(Scalar(0), rhs(0, idx).imag());
+                sw::universal::quire_mul(Scalar(0), rhs.coeff(0, idx).imag());
 
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx), rhs(0, idx).imag());
+                sw::universal::quire_mul(lhs.coeff(0, idx), rhs.coeff(0, idx).imag());
             q_imag +=
-                sw::universal::quire_mul(Scalar(0), rhs(0, idx).real());
+                sw::universal::quire_mul(Scalar(0), rhs.coeff(0, idx).real());
           }
         } else {
           assert(lhs.cols() == rhs.rows());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(0, idx), rhs(idx, 0).real());
+                sw::universal::quire_mul(lhs.coeff(0, idx), rhs.coeff(idx, 0).real());
             q_real -=
-                sw::universal::quire_mul(Scalar(0), rhs(idx, 0).imag());
+                sw::universal::quire_mul(Scalar(0), rhs.coeff(idx, 0).imag());
 
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx), rhs(idx, 0).imag());
+                sw::universal::quire_mul(lhs.coeff(0, idx), rhs.coeff(idx, 0).imag());
             q_imag +=
-                sw::universal::quire_mul(Scalar(0), rhs(idx, 0).real());
+                sw::universal::quire_mul(Scalar(0), rhs.coeff(idx, 0).real());
           }
         }
       } else {
@@ -115,27 +115,27 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
           assert(lhs.rows() == rhs.cols());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(idx, 0), rhs(0, idx).real());
+                sw::universal::quire_mul(lhs.coeff(idx, 0), rhs.coeff(0, idx).real());
             q_real -=
-                sw::universal::quire_mul(Scalar(0), rhs(0, idx).imag());
+                sw::universal::quire_mul(Scalar(0), rhs.coeff(0, idx).imag());
 
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0), rhs(0, idx).imag());
+                sw::universal::quire_mul(lhs.coeff(idx, 0), rhs.coeff(0, idx).imag());
             q_imag +=
-                sw::universal::quire_mul(Scalar(0), rhs(0, idx).real());
+                sw::universal::quire_mul(Scalar(0), rhs.coeff(0, idx).real());
           }
         } else {
           assert(lhs.rows() == rhs.rows());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(idx, 0), rhs(idx, 0).real());
+                sw::universal::quire_mul(lhs.coeff(idx, 0), rhs.coeff(idx, 0).real());
             q_real -=
-                sw::universal::quire_mul(Scalar(0), rhs(idx, 0).imag());
+                sw::universal::quire_mul(Scalar(0), rhs.coeff(idx, 0).imag());
 
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0), rhs(idx, 0).imag());
+                sw::universal::quire_mul(lhs.coeff(idx, 0), rhs.coeff(idx, 0).imag());
             q_imag +=
-                sw::universal::quire_mul(Scalar(0), rhs(idx, 0).real());
+                sw::universal::quire_mul(Scalar(0), rhs.coeff(idx, 0).real());
           }
         }
       }
@@ -164,27 +164,27 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
           assert(lhs.cols() == rhs.cols());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(0, idx).real(), rhs(0, idx));
+                sw::universal::quire_mul(lhs.coeff(0, idx).real(), rhs.coeff(0, idx));
             q_real -=
-                sw::universal::quire_mul(lhs(0, idx).imag(), Scalar(0));
+                sw::universal::quire_mul(lhs.coeff(0, idx).imag(), Scalar(0));
 
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).real(), Scalar(0));
+                sw::universal::quire_mul(lhs.coeff(0, idx).real(), Scalar(0));
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(0, idx));
+                sw::universal::quire_mul(lhs.coeff(0, idx).imag(), rhs.coeff(0, idx));
           }
         } else {
           assert(lhs.cols() == rhs.rows());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(0, idx).real(), rhs(idx, 0));
+                sw::universal::quire_mul(lhs.coeff(0, idx).real(), rhs.coeff(idx, 0));
             q_real -=
-                sw::universal::quire_mul(lhs(0, idx).imag(), Scalar(0));
+                sw::universal::quire_mul(lhs.coeff(0, idx).imag(), Scalar(0));
 
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).real(), Scalar(0));
+                sw::universal::quire_mul(lhs.coeff(0, idx).real(), Scalar(0));
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(idx, 0));
+                sw::universal::quire_mul(lhs.coeff(0, idx).imag(), rhs.coeff(idx, 0));
           }
         }
       } else {
@@ -192,27 +192,27 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
           assert(lhs.rows() == rhs.cols());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(0, idx));
+                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), rhs.coeff(0, idx));
             q_real -=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), Scalar(0));
+                sw::universal::quire_mul(lhs.coeff(idx, 0).imag(), Scalar(0));
 
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), Scalar(0));
+                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), Scalar(0));
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(0, idx));
+                sw::universal::quire_mul(lhs.coeff(idx, 0).imag(), rhs.coeff(0, idx));
           }
         } else {
           assert(lhs.rows() == rhs.rows());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(idx, 0));
+                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), rhs(idx, 0));
             q_real -=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), Scalar(0));
+                sw::universal::quire_mul(lhs.coeff(idx, 0).imag(), Scalar(0));
 
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), Scalar(0));
+                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), Scalar(0));
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(idx, 0));
+                sw::universal::quire_mul(lhs.coeff(idx, 0).imag(), rhs.coeff(idx, 0));
           }
         }
       }
@@ -231,27 +231,27 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
           assert(lhs.cols() == rhs.cols());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(0, idx).real(), rhs(0, idx).real());
+                sw::universal::quire_mul(lhs.coeff(0, idx).real(), rhs.coeff(0, idx).real());
             q_real -=
-                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(0, idx).imag());
+                sw::universal::quire_mul(lhs.coeff(0, idx).imag(), rhs.coeff(0, idx).imag());
 
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).real(), rhs(0, idx).imag());
+                sw::universal::quire_mul(lhs.coeff(0, idx).real(), rhs.coeff(0, idx).imag());
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(0, idx).real());
+                sw::universal::quire_mul(lhs.coeff(0, idx).imag(), rhs.coeff(0, idx).real());
           }
         } else {
           assert(lhs.cols() == rhs.rows());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(0, idx).real(), rhs(idx, 0).real());
+                sw::universal::quire_mul(lhs.coeff(0, idx).real(), rhs.coeff(idx, 0).real());
             q_real -=
-                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(idx, 0).imag());
+                sw::universal::quire_mul(lhs.coeff(0, idx).imag(), rhs.coeff(idx, 0).imag());
 
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).real(), rhs(idx, 0).imag());
+                sw::universal::quire_mul(lhs.coeff(0, idx).real(), rhs.coeff(idx, 0).imag());
             q_imag +=
-                sw::universal::quire_mul(lhs(0, idx).imag(), rhs(idx, 0).real());
+                sw::universal::quire_mul(lhs.coeff(0, idx).imag(), rhs.coeff(idx, 0).real());
           }
         }
       } else {
@@ -259,27 +259,27 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
           assert(lhs.rows() == rhs.cols());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(0, idx).real());
+                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), rhs.coeff(0, idx).real());
             q_real -=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(0, idx).imag());
+                sw::universal::quire_mul(lhs.coeff(idx, 0).imag(), rhs.coeff(0, idx).imag());
 
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(0, idx).imag());
+                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), rhs.coeff(0, idx).imag());
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(0, idx).real());
+                sw::universal::quire_mul(lhs.coeff(idx, 0).imag(), rhs.coeff(0, idx).real());
           }
         } else {
           assert(lhs.rows() == rhs.rows());
           for (Eigen::Index idx = 0; idx < depth; idx++) {
             q_real +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(idx, 0).real());
+                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), rhs.coeff(idx, 0).real());
             q_real -=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(idx, 0).imag());
+                sw::universal::quire_mul(lhs.coeff(idx, 0).imag(), rhs.coeff(idx, 0).imag());
 
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).real(), rhs(idx, 0).imag());
+                sw::universal::quire_mul(lhs.coeff(idx, 0).real(), rhs.coeff(idx, 0).imag());
             q_imag +=
-                sw::universal::quire_mul(lhs(idx, 0).imag(), rhs(idx, 0).real());
+                sw::universal::quire_mul(lhs.coeff(idx, 0).imag(), rhs.coeff(idx, 0).real());
           }
         }
       }
