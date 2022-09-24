@@ -23,6 +23,9 @@ enum class EigenOverrideMask {
   GENERIC_GEMV = 0x1ul << 16,
   GENERIC_LAZY = 0x1ul << 17,
   GENERIC_INNER = 0x1ul << 18,
+  SPARSE_LHS = 0x1ul << 19,
+  SPARSE_RHS = 0x1ul << 20,
+  SPARSE_DST = 0x1ul << 21,
 };
 
 // A global variable (that can also be shared across threads) which tells us

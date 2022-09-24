@@ -6,8 +6,9 @@
 #include <type_traits>
 #include <universal/number/posit/posit.hpp>
 #include <universal/traits/posit_traits.hpp>
+#include <Eigen/Sparse>
 
-// complex number traits, taken from the stillwater library
+// complex number traits, adapted from the stillwater universal library's is_posit trait
 template <typename _Ty> struct is_complex_trait : std::false_type {};
 
 template <typename InnerScalar>
@@ -61,5 +62,19 @@ concept ScalarIsComplexPosit = is_complex_posit<Scalar>;
 template <typename A>
 concept HasPositOrComplexPositScalar =
     is_posit_or_complex_posit<typename A::Scalar>;
+
+
+// sparse matrices/vectors
+template <typename _Ty> struct is_sparse_vector_trait : std::false_type {};
+template <typename InnerScalar>
+struct is_sparse_vector_trait<Eigen::SparseVector<InnerScalar>> : std::true_type {};
+template<typename _Ty>
+constexpr bool is_sparse_vector = is_sparse_vector_trait<typename _Ty::Base>::value;
+
+template <typename StorageKind> struct is_sparse_trait : std::false_type {};
+template <>
+struct is_sparse_trait<Eigen::Sparse> : std::true_type {};
+template<typename _Ty>
+constexpr bool is_sparse = is_sparse_trait<typename _Ty::StorageKind>::value;
 
 #endif

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-set( CMAKE_VERBOSE_MAKEFILE on )
+#  set( CMAKE_VERBOSE_MAKEFILE on )
 project(EigenUniversalIntegration VERSION 0.1.0)
 include(CTest)
 
@@ -51,6 +51,20 @@ install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/EigenIntegration" DESTINATION include)
 
 if(TEST)
+
+    add_executable(ComplexSparse test/test_sparse.cxx)
+    target_link_libraries(ComplexSparse Eigen3::Eigen OpenMP::OpenMP_CXX)
+    target_include_directories(ComplexSparse PUBLIC "${PROJECT_BINARY_DIR}" "EigenIntegration" universal)
+    target_compile_definitions(ComplexSparse PUBLIC COMPLEX TEST_EIGEN_USAGE USE_AVX2)
+    target_compile_features(ComplexSparse INTERFACE cxx_std_20)
+    add_test(NAME ComplexSparse COMMAND ComplexSparse)
+    add_executable(RealSparse test/test_sparse.cxx)
+    target_link_libraries(RealSparse Eigen3::Eigen OpenMP::OpenMP_CXX)
+    target_include_directories(RealSparse PUBLIC "${PROJECT_BINARY_DIR}" "EigenIntegration" universal)
+    target_compile_definitions(RealSparse PUBLIC REAL TEST_EIGEN_USAGE USE_AVX2)
+    target_compile_features(RealSparse INTERFACE cxx_std_20)
+    add_test(NAME RealSparse COMMAND RealSparse)
+
     list(APPEND CORRECTNESS_TEST_DECLARES LAZY GEMM_COL GEMM_ROW GEMV_COL GEMV_ROW _DOT _DOT_T)
     foreach(td IN LISTS CORRECTNESS_TEST_DECLARES)
         add_executable(Real${td} test/test_eigen_correctness_and_usage.cxx)
@@ -67,6 +81,8 @@ if(TEST)
         target_compile_features(Complex${td} INTERFACE cxx_std_20)
         add_test(NAME Complex${td} COMMAND Complex${td})
     endforeach()
+
+
 
     add_executable(TestIO test/test_matrix_io.cxx)
     target_link_libraries(TestIO Eigen3::Eigen OpenMP::OpenMP_CXX)

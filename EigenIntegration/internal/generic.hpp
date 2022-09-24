@@ -3,6 +3,7 @@
 #include "posit_concepts.hpp"
 #include <Eigen/Dense>
 #include <omp.h>
+#include <sys/types.h>
 #include <universal/number/posit/fdp.hpp>
 #include <universal/number/posit/posit.hpp>
 #include <universal/traits/posit_traits.hpp>
@@ -90,8 +91,20 @@ struct generic_product_impl<Lhs, Rhs, LeftSideShape__, RightSideShape__, Defined
       // #pragma omp parallel for collapse(2)
       for (int row = 0; row < dst.rows(); row++) {
         for (int col = 0; col < dst.cols(); col++) {
-          dst.coeffRef(row, col) +=
-              actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
+          if constexpr (is_sparse<Dest>) {
+            // only insert into the matrix if it is non zero
+            Scalar result = actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
+            if (result != Scalar(0)) {
+              #pragma omp critical
+              dst.coeffRef(row, col) = result;
+            }
+            #ifdef TEST_EIGEN_USAGE
+            eigen_usage_vector |= (uint64_t)EigenOverrideMask::SPARSE_DST;
+            #endif
+          } else {
+            dst.coeffRef(row, col) +=
+                actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
+          }
         }
       }
     } else {
@@ -109,8 +122,20 @@ struct generic_product_impl<Lhs, Rhs, LeftSideShape__, RightSideShape__, Defined
           #pragma omp parallel for collapse(2)
           for (int row = blocking_row_start; row < max_row; row++) {
             for (int col = blocking_col_start; col < max_col; col++) {
-              dst.coeffRef(row, col) +=
-                  actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
+              if constexpr (is_sparse<Dest>) {
+                // only insert into the matrix if it is non zero
+                Scalar result = actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
+                if (result != Scalar(0)) {
+                  #pragma omp critical
+                  dst.coeffRef(row, col) = result;
+                }
+                #ifdef TEST_EIGEN_USAGE
+                eigen_usage_vector |= (uint64_t)EigenOverrideMask::SPARSE_DST;
+                #endif
+              } else {
+                dst.coeffRef(row, col) +=
+                    actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
+              }
             }
           }
         }
