@@ -35,8 +35,10 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
 
   // first, turn sparse vectors into dense vectors by extracting the non-zero elements
   if constexpr (is_sparse<Lhs> && is_sparse<Rhs>) {
-    Eigen::VectorX<typename Lhs::Scalar> lhs_dense = Eigen::VectorX<typename Lhs::Scalar>::Zero(depth);
-    Eigen::VectorX<typename Rhs::Scalar> rhs_dense = Eigen::VectorX<typename Rhs::Scalar>::Zero(depth);
+    // Eigen::VectorX<typename Lhs::Scalar> lhs_dense = Eigen::VectorX<typename Lhs::Scalar>::Zero(depth);
+    // Eigen::VectorX<typename Rhs::Scalar> rhs_dense = Eigen::VectorX<typename Rhs::Scalar>::Zero(depth);
+    std::vector<typename Lhs::Scalar> lhs_dense;
+    std::vector<typename Rhs::Scalar> rhs_dense;
 
     // about that 0: according to some simple tests, it should always work out, given our premise that one of the axes has to have unit size
     Eigen::Index current_index = 0;
@@ -52,56 +54,63 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
         continue;
       }
       if (lit.index() == rit.index()) {
-        lhs_dense(current_index) = lit.value();
-        rhs_dense(current_index) = rit.value();
+        lhs_dense.push_back(lit.value());
+        rhs_dense.push_back(rit.value());
         current_index++;
         ++lit;
         ++rit;
       }
     }
 
-    lhs_dense.conservativeResize(current_index);
-    rhs_dense.conservativeResize(current_index);
+    Eigen::VectorX<typename Lhs::Scalar> lhs_dense_vec = Eigen::VectorX<typename Lhs::Scalar>::Map(lhs_dense.data(), lhs_dense.size());
+    Eigen::VectorX<typename Rhs::Scalar> rhs_dense_vec = Eigen::VectorX<typename Rhs::Scalar>::Map(rhs_dense.data(), rhs_dense.size());
 
     #ifdef TEST_EIGEN_USAGE
     eigen_usage_vector |= (uint64_t)EigenOverrideMask::SPARSE_LHS;
     eigen_usage_vector |= (uint64_t)EigenOverrideMask::SPARSE_RHS;
     #endif
-    return eigen_fdp(lhs_dense, rhs_dense);
+    return eigen_fdp(lhs_dense_vec, rhs_dense_vec);
 
   } else if constexpr (is_sparse<Lhs>) {
-    Eigen::VectorX<typename Lhs::Scalar> lhs_dense = Eigen::VectorX<typename Lhs::Scalar>::Zero(depth);
-    Eigen::VectorX<typename Rhs::Scalar> rhs_dense = Eigen::VectorX<typename Rhs::Scalar>::Zero(depth);
+    // Eigen::VectorX<typename Lhs::Scalar> lhs_dense = Eigen::VectorX<typename Lhs::Scalar>::Zero(depth);
+    // Eigen::VectorX<typename Rhs::Scalar> rhs_dense = Eigen::VectorX<typename Rhs::Scalar>::Zero(depth);
+
+    std::vector<typename Lhs::Scalar> lhs_dense;
+    std::vector<typename Rhs::Scalar> rhs_dense;
+
 
     Eigen::Index current_index = 0;
     for(typename Eigen::InnerIterator<Lhs> it(lhs, 0); it; ++it) {
-      lhs_dense(current_index) = it.value();
-      rhs_dense(current_index) = rhs(it.index());
+      lhs_dense.push_back(it.value());
+      rhs_dense.push_back(rhs(it.index()));
       current_index++;
     }
-    lhs_dense.conservativeResize(current_index);
-    rhs_dense.conservativeResize(current_index);
+    Eigen::VectorX<typename Lhs::Scalar> lhs_dense_vec = Eigen::VectorX<typename Lhs::Scalar>::Map(lhs_dense.data(), lhs_dense.size());
+    Eigen::VectorX<typename Rhs::Scalar> rhs_dense_vec = Eigen::VectorX<typename Rhs::Scalar>::Map(rhs_dense.data(), rhs_dense.size());
     #ifdef TEST_EIGEN_USAGE
     eigen_usage_vector |= (uint64_t)EigenOverrideMask::SPARSE_LHS;
     #endif
-    return eigen_fdp(lhs_dense, rhs_dense);
+    return eigen_fdp(lhs_dense_vec, rhs_dense_vec);
   } else if constexpr (is_sparse<Rhs>) {
-    Eigen::VectorX<typename Lhs::Scalar> lhs_dense = Eigen::VectorX<typename Lhs::Scalar>::Zero(depth);
-    Eigen::VectorX<typename Rhs::Scalar> rhs_dense = Eigen::VectorX<typename Rhs::Scalar>::Zero(depth);
+    // Eigen::VectorX<typename Lhs::Scalar> lhs_dense = Eigen::VectorX<typename Lhs::Scalar>::Zero(depth);
+    // Eigen::VectorX<typename Rhs::Scalar> rhs_dense = Eigen::VectorX<typename Rhs::Scalar>::Zero(depth);
+
+    std::vector<typename Lhs::Scalar> lhs_dense;
+    std::vector<typename Rhs::Scalar> rhs_dense;
 
     Eigen::Index current_index = 0;
     for(typename Eigen::InnerIterator<Rhs> it(rhs, 0); it; ++it) {
-      lhs_dense(current_index) = lhs(it.index());
-      rhs_dense(current_index) = it.value();
+      lhs_dense.push_back(lhs(it.index()));
+      rhs_dense.push_back(it.value());
       current_index++;
     }
-    lhs_dense.conservativeResize(current_index);
-    rhs_dense.conservativeResize(current_index);
+    Eigen::VectorX<typename Lhs::Scalar> lhs_dense_vec = Eigen::VectorX<typename Lhs::Scalar>::Map(lhs_dense.data(), lhs_dense.size());
+    Eigen::VectorX<typename Rhs::Scalar> rhs_dense_vec = Eigen::VectorX<typename Rhs::Scalar>::Map(rhs_dense.data(), rhs_dense.size());
 
     #ifdef TEST_EIGEN_USAGE
     eigen_usage_vector |= (uint64_t)EigenOverrideMask::SPARSE_RHS;
     #endif
-    return eigen_fdp(lhs_dense, rhs_dense);
+    return eigen_fdp(lhs_dense_vec, rhs_dense_vec);
   } else {
     // then perform the actual computation
 

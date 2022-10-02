@@ -14,3 +14,7 @@
 #define DefinedProductType__ InnerProduct
 #include "generic.hpp"
 #undef DefinedProductType__
+
+#define DefinedProductType__ OuterProduct
+#include "generic.hpp"
+#undef DefinedProductType__
