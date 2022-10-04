@@ -95,7 +95,7 @@ struct generic_product_impl<Lhs, Rhs, LeftSideShape__, RightSideShape__, Defined
             // only insert into the matrix if it is non zero
             Scalar result = actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
             if (result != Scalar(0)) {
-              #pragma omp critical
+              // #pragma omp critical
               dst.coeffRef(row, col) = result;
             }
             #ifdef TEST_EIGEN_USAGE
@@ -119,14 +119,14 @@ struct generic_product_impl<Lhs, Rhs, LeftSideShape__, RightSideShape__, Defined
           int max_col = blocking_col_start + block_size > dst.cols()
                             ? dst.cols()
                             : blocking_col_start + block_size;
-          #pragma omp parallel for collapse(2)
+          // #pragma omp parallel for collapse(2)
           for (int row = blocking_row_start; row < max_row; row++) {
             for (int col = blocking_col_start; col < max_col; col++) {
               if constexpr (is_sparse<Dest>) {
                 // only insert into the matrix if it is non zero
                 Scalar result = actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
                 if (result != Scalar(0)) {
-                  #pragma omp critical
+                  // #pragma omp critical
                   dst.coeffRef(row, col) = result;
                 }
                 #ifdef TEST_EIGEN_USAGE

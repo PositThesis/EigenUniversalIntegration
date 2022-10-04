@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include <universal/number/posit/quire.hpp>
 #include "test_bitmask.hpp"
+#include <omp.h>
 
 template <typename Lhs, typename Rhs> struct MultiplyReturnType {
   typedef Lhs::Scalar type;
@@ -121,8 +122,13 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
 
       if constexpr (!is_complex<typename Rhs::Scalar>) { // Lhs and Rhs real
         sw::universal::quire<nbits, es, capacity> q(0);
+        #pragma omp parallel for
         for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q += sw::universal::quire_mul(lhs.coeff(idx), rhs.coeff(idx));
+          auto result = sw::universal::quire_mul(lhs.coeff(idx), rhs.coeff(idx));
+          #pragma omp critical
+          {
+            q += result; // assumption: q += is much faster than quire_mul.
+          }
         }
         typename Lhs::Scalar sum;
         convert(q.to_value(), sum);
@@ -133,17 +139,21 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
         constexpr size_t capacity = 20; // support vectors up to 1M elements
         sw::universal::quire<nbits, es, capacity> q_real(0);
         sw::universal::quire<nbits, es, capacity> q_imag(0);
+        #pragma omp parallel for
         for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q_real +=
-              sw::universal::quire_mul(lhs.coeff(idx), rhs.coeff(idx).real());
+          auto real = sw::universal::quire_mul(lhs.coeff(idx), rhs.coeff(idx).real());
           // left here as comment for completeness
           // q_real -=
           //     sw::universal::quire_mul(Scalar(0), rhs.coeff(idx).imag());
 
-          q_imag +=
-              sw::universal::quire_mul(lhs.coeff(idx), rhs.coeff(idx).imag());
+          auto imag = sw::universal::quire_mul(lhs.coeff(idx), rhs.coeff(idx).imag());
           // q_imag +=
           //     sw::universal::quire_mul(Scalar(0), rhs.coeff(idx).real());
+          #pragma omp critical
+          {
+            q_real += real;
+            q_imag += imag;
+          }
         }
 
         typename Rhs::Scalar::value_type sum_real;
@@ -160,17 +170,22 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
       sw::universal::quire<nbits, es, capacity> q_imag(0);
 
       if constexpr (!is_complex<typename Rhs::Scalar>) { // Lhs complex, Rhs real
+        #pragma omp parallel for
         for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q_real +=
-              sw::universal::quire_mul(lhs.coeff(idx).real(), rhs.coeff(idx));
+          auto real = sw::universal::quire_mul(lhs.coeff(idx).real(), rhs.coeff(idx));
           // left here as comments for completeness
           // q_real -=
           //      sw::universal::quire_mul(lhs.coeff(idx).imag(), Scalar(0));
 
           // q_imag +=
           //     sw::universal::quire_mul(lhs.coeff(idx).real(), Scalar(0));
-          q_imag +=
-              sw::universal::quire_mul(lhs.coeff(idx).imag(), rhs.coeff(idx));
+          auto imag = sw::universal::quire_mul(lhs.coeff(idx).imag(), rhs.coeff(idx));
+
+          #pragma omp critical
+          {
+            q_real += real;
+            q_imag += imag;
+          }
         }
 
         typename Lhs::Scalar::value_type sum_real;
@@ -179,16 +194,21 @@ typename MultiplyReturnType<Lhs, Rhs>::type eigen_fdp(const Lhs &lhs, const Rhs 
         convert(q_imag.to_value(), sum_imag);
         return std::complex(sum_real, sum_imag);
       } else { // Lhs and Rhs complex
+        #pragma omp parallel for
         for (Eigen::Index idx = 0; idx < depth; idx++) {
-          q_real +=
-              sw::universal::quire_mul(lhs.coeff(idx).real(), rhs.coeff(idx).real());
-          q_real -=
-              sw::universal::quire_mul(lhs.coeff(idx).imag(), rhs.coeff(idx).imag());
+          auto real  = sw::universal::quire_mul(lhs.coeff(idx).real(), rhs.coeff(idx).real());
+          auto real2 = sw::universal::quire_mul(lhs.coeff(idx).imag(), rhs.coeff(idx).imag());
 
-          q_imag +=
-              sw::universal::quire_mul(lhs.coeff(idx).real(), rhs.coeff(idx).imag());
-          q_imag +=
-              sw::universal::quire_mul(lhs.coeff(idx).imag(), rhs.coeff(idx).real());
+          auto imag = sw::universal::quire_mul(lhs.coeff(idx).real(), rhs.coeff(idx).imag());
+          auto imag2 = sw::universal::quire_mul(lhs.coeff(idx).imag(), rhs.coeff(idx).real());
+
+          #pragma omp critical
+          {
+            q_real += real;
+            q_real -= real2;
+            q_imag += imag;
+            q_imag += imag2;
+          }
         }
         typename Lhs::Scalar::value_type sum_real;
         typename Lhs::Scalar::value_type sum_imag;
