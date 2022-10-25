@@ -1,5 +1,5 @@
-#include "MtxIO.hpp"
 #include <iostream>
+#include "MtxIO.hpp"
 #include <string>
 #include <Eigen/Dense>
 #include <cmath>

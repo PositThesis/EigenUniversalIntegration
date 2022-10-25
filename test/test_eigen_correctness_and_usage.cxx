@@ -62,6 +62,7 @@ Matrix<Scalar, order> gen_matrix(Eigen::Index mat_rows, Eigen::Index mat_cols,
   return M;
 }
 
+
 template <typename Scalar>
 Vector<Scalar> gen_vector(Eigen::Index mat_size, Eigen::Index seed) {
   Vector<Scalar> V = Vector<Scalar>::Zero(mat_size, 1);

@@ -42,14 +42,6 @@ struct generic_product_impl<Lhs, Rhs, LeftSideShape__, RightSideShape__, Defined
 
   template <typename Dst>
   static void evalTo(Dst &dst, const Lhs &lhs, const Rhs &rhs) {
-    // See http://eigen.tuxfamily.org/bz/show_bug.cgi?id=404 for a discussion
-    // and helper program to determine the following heuristic.
-    // EIGEN_GEMM_TO_COEFFBASED_THRESHOLD is typically defined to 20 in
-    // GeneralProduct.h, unless it has been specialized by the user or for a
-    // given architecture. Note that the condition rhs.rows()>0 was required
-    // because lazy product is (was?) not happy with empty inputs. I'm not sure
-    // it is still required.
-
     dst.setZero();
     scaleAndAddTo(dst, lhs, rhs, Scalar(1));
   }
@@ -96,8 +88,9 @@ struct generic_product_impl<Lhs, Rhs, LeftSideShape__, RightSideShape__, Defined
             Scalar result = actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
             if (result != Scalar(0)) {
               // #pragma omp critical
-              dst.coeffRef(row, col) = result;
+              dst.coeffRef(row, col) += result;
             }
+            std::cout << "is sparse" << std::endl;
             #ifdef TEST_EIGEN_USAGE
             eigen_usage_vector |= (uint64_t)EigenOverrideMask::SPARSE_DST;
             #endif
@@ -127,7 +120,7 @@ struct generic_product_impl<Lhs, Rhs, LeftSideShape__, RightSideShape__, Defined
                 Scalar result = actualAlpha * eigen_fdp(lhs.row(row), rhs.col(col));
                 if (result != Scalar(0)) {
                   // #pragma omp critical
-                  dst.coeffRef(row, col) = result;
+                  dst.coeffRef(row, col) += result;
                 }
                 #ifdef TEST_EIGEN_USAGE
                 eigen_usage_vector |= (uint64_t)EigenOverrideMask::SPARSE_DST;

@@ -59,10 +59,12 @@
                     '';
                 };
 
+                # echo '${eigen_patch_file}' > svd_patch.patch
+                # patch -p1 < svd_patch.patch
                 eigen = pkgs.eigen.overrideAttrs(old: {
                     prePatch = ''
-                        echo '${eigen_patch_file}' > svd_patch.patch
-                        patch -p1 < svd_patch.patch
+
+                        sed -i 's/essential\.adjoint()/essential.adjoint().eval()/g' Eigen/src/Householder/Householder.h
                     '';
                     #prePatch = ''
                     #    patch -p1 < ${eigen_patch_file}/eigwn_svd.patch
