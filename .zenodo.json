@@ -1,0 +1,13 @@
+{
+    "creators": [
+        {
+            "name": "Yannik Böttcher"
+        }
+    ],
+    "description": "Integration of the fused dot product of posits of the Universal library into the Eigen library.",
+    "references": [
+        "G. Guennebaud, B. Jacob, et al. Eigen v3. http://eigen.tuxfamily.org. 2010.",
+        "E. T. L. Omtzigt et al. \"Universal Numbers Library: design and implementation of a high-performance reproducible number systems library\". In: arXiv:2012.11011 (2020)."
+    ]
+}
+
